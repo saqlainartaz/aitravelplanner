@@ -6,6 +6,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { MdAttachMoney } from "react-icons/md";
 
 interface Place {
   name: string;
@@ -20,18 +21,27 @@ interface DestinationCardProps {
 
 export default function DestinationCard({ place }: DestinationCardProps) {
   return (
-    <Card>
+    <Card className="backdrop-blur-sm bg-card/95">
       <CardHeader>
-        <CardTitle>{place.name}</CardTitle>
-        <CardDescription>
-          Estimated Cost: ${place.estimatedCost.toLocaleString()}
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-xl">{place.name}</CardTitle>
+          <div className="flex items-center gap-1 text-muted-foreground">
+            <MdAttachMoney className="h-5 w-5" />
+            <span>{place.estimatedCost.toLocaleString()}</span>
+          </div>
+        </div>
+        <CardDescription className="line-clamp-2">
+          {place.description}
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <p className="mb-4">{place.description}</p>
         <div className="flex flex-wrap gap-2">
           {place.activities.map((activity, i) => (
-            <Badge key={i} variant="secondary">
+            <Badge 
+              key={i} 
+              variant="secondary"
+              className="bg-primary/10 text-primary hover:bg-primary/20"
+            >
               {activity}
             </Badge>
           ))}

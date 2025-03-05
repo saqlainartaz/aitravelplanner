@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/form";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
+import { Loader2 } from "lucide-react";
 
 export default function TravelForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -23,12 +24,18 @@ export default function TravelForm() {
   const { toast } = useToast();
 
   const form = useForm({
-    resolver: zodResolver(insertTravelRequestSchema),
+    resolver: zodResolver(
+      insertTravelRequestSchema.extend({
+        email: insertTravelRequestSchema.shape.email.email("Please enter a valid email"),
+        budget: insertTravelRequestSchema.shape.budget.min(100, "Budget must be at least $100"),
+        duration: insertTravelRequestSchema.shape.duration.min(1, "Duration must be at least 1 day"),
+      })
+    ),
     defaultValues: {
       email: "",
       destination: "",
-      budget: 0,
-      duration: 0,
+      budget: undefined,
+      duration: undefined,
       preferences: "",
     },
   });
@@ -69,7 +76,11 @@ export default function TravelForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input placeholder="your@email.com" {...field} />
+                <Input 
+                  placeholder="your@email.com" 
+                  {...field}
+                  className="bg-background/50"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -83,7 +94,11 @@ export default function TravelForm() {
             <FormItem>
               <FormLabel>Destination</FormLabel>
               <FormControl>
-                <Input placeholder="Where do you want to go?" {...field} />
+                <Input 
+                  placeholder="Where do you want to go?" 
+                  {...field}
+                  className="bg-background/50"
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -103,6 +118,7 @@ export default function TravelForm() {
                     placeholder="5000"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
+                    className="bg-background/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -122,6 +138,7 @@ export default function TravelForm() {
                     placeholder="7"
                     {...field}
                     onChange={(e) => field.onChange(Number(e.target.value))}
+                    className="bg-background/50"
                   />
                 </FormControl>
                 <FormMessage />
@@ -140,6 +157,7 @@ export default function TravelForm() {
                 <Textarea
                   placeholder="Tell us about your interests (e.g., adventure, culture, food...)"
                   {...field}
+                  className="bg-background/50 min-h-[100px]"
                 />
               </FormControl>
               <FormMessage />
@@ -147,8 +165,19 @@ export default function TravelForm() {
           )}
         />
 
-        <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Generating Recommendations..." : "Get Recommendations"}
+        <Button 
+          type="submit" 
+          className="w-full font-medium" 
+          disabled={isLoading}
+        >
+          {isLoading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating Recommendations...
+            </>
+          ) : (
+            "Get Recommendations"
+          )}
         </Button>
       </form>
     </Form>

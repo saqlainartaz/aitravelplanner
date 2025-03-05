@@ -115,17 +115,22 @@ export default function TravelForm() {
       if (result.success) {
         toast({
           title: "Success!",
-          description: "Your travel recommendations are being generated.",
+          description: "Your travel recommendations are ready.",
         });
         setLocation(`/results/${result.id}`);
       } else {
-        throw new Error(result.message);
+        // Handle specific error messages
+        let errorMessage = result.message;
+        if (errorMessage.includes("high demand") || errorMessage.includes("429")) {
+          errorMessage = "We're experiencing high demand. Please try again in a few minutes.";
+        }
+        throw new Error(errorMessage);
       }
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error",
-        description: error instanceof Error ? error.message : "An error occurred",
+        description: error instanceof Error ? error.message : "An error occurred while generating recommendations. Please try again.",
       });
     } finally {
       setIsLoading(false);

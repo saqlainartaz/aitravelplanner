@@ -26,6 +26,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import * as z from 'zod';
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
@@ -63,19 +64,33 @@ export default function TravelForm() {
       insertTravelRequestSchema.extend({
         email: insertTravelRequestSchema.shape.email.email("Please enter a valid email"),
         budget: insertTravelRequestSchema.shape.budget.min(100, "Budget must be at least $100"),
-        startDate: insertTravelRequestSchema.shape.startDate.refine(
-          (date) => date > new Date(),
+        startDate: z.date().refine(
+          (date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date > today;
+          },
           "Start date must be in the future"
         ),
-        endDate: insertTravelRequestSchema.shape.endDate.refine(
-          (date) => date > new Date(),
+        endDate: z.date().refine(
+          (date) => {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            return date > today;
+          },
           "End date must be in the future"
+        ).refine(
+          (date, ctx) => {
+            const startDate = ctx.parent.startDate;
+            return !startDate || date > startDate;
+          },
+          "End date must be after start date"
         ),
       })
     ),
     defaultValues: {
       email: "",
-      travelFrom: "", // Added travelFrom
+      travelFrom: "",
       destination: "",
       budget: undefined,
       startDate: undefined,
@@ -124,8 +139,8 @@ export default function TravelForm() {
             <FormItem>
               <FormLabel>Email</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="your@email.com" 
+                <Input
+                  placeholder="your@email.com"
                   {...field}
                   className="bg-background/50"
                 />
@@ -142,8 +157,8 @@ export default function TravelForm() {
             <FormItem>
               <FormLabel>Traveling From</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Your departure city/location" 
+                <Input
+                  placeholder="Your departure city/location"
                   {...field}
                   className="bg-background/50"
                 />
@@ -160,8 +175,8 @@ export default function TravelForm() {
             <FormItem>
               <FormLabel>Destination</FormLabel>
               <FormControl>
-                <Input 
-                  placeholder="Where do you want to go?" 
+                <Input
+                  placeholder="Where do you want to go?"
                   {...field}
                   className="bg-background/50"
                 />
@@ -202,9 +217,11 @@ export default function TravelForm() {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date <= new Date()
-                      }
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date <= today;
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -244,9 +261,12 @@ export default function TravelForm() {
                       mode="single"
                       selected={field.value}
                       onSelect={field.onChange}
-                      disabled={(date) =>
-                        date <= new Date() || (form.getValues("startDate") && date <= form.getValues("startDate"))
-                      }
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        const startDate = form.getValues("startDate");
+                        return date <= today || (startDate && date <= startDate);
+                      }}
                       initialFocus
                     />
                   </PopoverContent>
@@ -392,9 +412,9 @@ export default function TravelForm() {
           )}
         />
 
-        <Button 
-          type="submit" 
-          className="w-full font-medium" 
+        <Button
+          type="submit"
+          className="w-full font-medium"
           disabled={isLoading}
         >
           {isLoading ? (

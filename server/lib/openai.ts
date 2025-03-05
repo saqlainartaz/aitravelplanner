@@ -1,8 +1,56 @@
 import OpenAI from "openai";
 import { TravelRecommendation } from "@shared/types";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function generateMockRecommendations(
+  destination: string,
+  budget: number,
+  startDate: string,
+  endDate: string,
+  preferences: string,
+  travelGroup: string,
+  accommodationType: string,
+  activities: string,
+  transportationMode: string
+): TravelRecommendation {
+  return {
+    places: [
+      {
+        name: `Popular Spot in ${destination}`,
+        description: "A beautiful location with amazing views and cultural significance.",
+        activities: ["Sightseeing", "Photography", "Local Food Tasting"],
+        estimatedCost: Math.round(budget * 0.3)
+      },
+      {
+        name: `Hidden Gem in ${destination}`,
+        description: "Off the beaten path location loved by locals.",
+        activities: ["Walking Tours", "Shopping", "Cultural Activities"],
+        estimatedCost: Math.round(budget * 0.2)
+      }
+    ],
+    tips: [
+      `Best time to visit ${destination} is during the dates you selected: ${startDate} to ${endDate}`,
+      `${transportationMode} is a great choice for getting around`,
+      "Remember to carry comfortable walking shoes",
+      "Try the local cuisine at recommended restaurants"
+    ],
+    accommodation: {
+      suggestions: [
+        `${accommodationType} in City Center - Great for ${travelGroup}`,
+        `${accommodationType} near Tourist Spots - Easy access to attractions`,
+        `Budget-friendly ${accommodationType} with good reviews`
+      ],
+      priceRange: `$${Math.round(budget * 0.4)} - $${Math.round(budget * 0.6)} per night`
+    },
+    transportation: {
+      options: [
+        "Public Transportation - Economic and efficient",
+        "Taxi/Ride-sharing - Convenient for short trips",
+        "Rental Services - Flexible for exploration"
+      ],
+      recommendations: `Based on your preference for ${transportationMode}, we recommend using a combination of public transport and ride-sharing services.`
+    }
+  };
+}
 
 export async function generateTravelRecommendations(
   destination: string,
@@ -15,49 +63,21 @@ export async function generateTravelRecommendations(
   activities: string,
   transportationMode: string
 ): Promise<TravelRecommendation> {
-  const prompt = `Generate detailed travel recommendations for a trip to ${destination}. 
-  Travel Details:
-  - Budget: $${budget}
-  - Dates: ${startDate} to ${endDate}
-  - Group: ${travelGroup}
-  - Accommodation: ${accommodationType}
-  - Transportation: ${transportationMode}
-  - Activities Interest: ${activities}
-  - Additional Preferences: ${preferences}
-
-  Please provide recommendations in JSON format matching the following structure:
-  {
-    "places": [{"name": string, "description": string, "activities": string[], "estimatedCost": number}],
-    "tips": string[],
-    "accommodation": {"suggestions": string[], "priceRange": string},
-    "transportation": {"options": string[], "recommendations": string}
-  }`;
-
   try {
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o",
-      messages: [{ role: "user", content: prompt }],
-      response_format: { type: "json_object" }
-    });
-
-    if (!response.choices[0].message.content) {
-      throw new Error("No response from OpenAI");
-    }
-
-    return JSON.parse(response.choices[0].message.content);
+    // Using mock data for now
+    return generateMockRecommendations(
+      destination,
+      budget,
+      startDate,
+      endDate,
+      preferences,
+      travelGroup,
+      accommodationType,
+      activities,
+      transportationMode
+    );
   } catch (error: any) {
-    console.error("OpenAI API error:", error);
-
-    // Handle rate limit errors specifically
-    if (error.status === 429) {
-      throw new Error("We're experiencing high demand. Please try again in a few minutes.");
-    }
-
-    // Handle other potential errors
-    if (error.status === 401) {
-      throw new Error("API authentication error. Please contact support.");
-    }
-
+    console.error("Travel recommendation generation error:", error);
     throw new Error("Unable to generate travel recommendations at this time. Please try again later.");
   }
 }

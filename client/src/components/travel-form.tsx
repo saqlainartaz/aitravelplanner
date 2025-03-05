@@ -7,6 +7,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Calendar } from "@/components/ui/calendar";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
@@ -22,6 +29,30 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
 
+const ACCOMMODATION_TYPES = [
+  "Hotel",
+  "Resort",
+  "Airbnb",
+  "Hostel",
+  "Vacation Rental",
+];
+
+const TRANSPORTATION_MODES = [
+  "Flying",
+  "Driving",
+  "Train",
+  "Bus",
+  "Combination",
+];
+
+const TRAVEL_GROUPS = [
+  "Solo",
+  "Couple",
+  "Family",
+  "Friends",
+  "Business",
+];
+
 export default function TravelForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
@@ -32,13 +63,12 @@ export default function TravelForm() {
       insertTravelRequestSchema.extend({
         email: insertTravelRequestSchema.shape.email.email("Please enter a valid email"),
         budget: insertTravelRequestSchema.shape.budget.min(100, "Budget must be at least $100"),
-        duration: insertTravelRequestSchema.shape.duration.min(1, "Duration must be at least 1 day"),
         startDate: insertTravelRequestSchema.shape.startDate.refine(
-          (date) => date >= new Date(),
+          (date) => date > new Date(),
           "Start date must be in the future"
         ),
         endDate: insertTravelRequestSchema.shape.endDate.refine(
-          (date) => date >= new Date(),
+          (date) => date > new Date(),
           "End date must be in the future"
         ),
       })
@@ -47,10 +77,13 @@ export default function TravelForm() {
       email: "",
       destination: "",
       budget: undefined,
-      duration: undefined,
-      preferences: "",
       startDate: undefined,
       endDate: undefined,
+      preferences: "",
+      travelGroup: undefined,
+      accommodationType: undefined,
+      activities: "",
+      transportationMode: undefined,
     },
   });
 
@@ -151,7 +184,7 @@ export default function TravelForm() {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date < new Date()
+                        date <= new Date()
                       }
                       initialFocus
                     />
@@ -193,7 +226,7 @@ export default function TravelForm() {
                       selected={field.value}
                       onSelect={field.onChange}
                       disabled={(date) =>
-                        date < new Date() || (form.getValues("startDate") && date < form.getValues("startDate"))
+                        date <= new Date() || (form.getValues("startDate") && date <= form.getValues("startDate"))
                       }
                       initialFocus
                     />
@@ -228,19 +261,76 @@ export default function TravelForm() {
 
           <FormField
             control={form.control}
-            name="duration"
+            name="travelGroup"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Duration (days)</FormLabel>
-                <FormControl>
-                  <Input
-                    type="number"
-                    placeholder="7"
-                    {...field}
-                    onChange={(e) => field.onChange(Number(e.target.value))}
-                    className="bg-background/50"
-                  />
-                </FormControl>
+                <FormLabel>Travel Group</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="Who are you traveling with?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TRAVEL_GROUPS.map((group) => (
+                      <SelectItem key={group} value={group}>
+                        {group}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <FormField
+            control={form.control}
+            name="accommodationType"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Accommodation Type</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="Select preferred accommodation" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {ACCOMMODATION_TYPES.map((type) => (
+                      <SelectItem key={type} value={type}>
+                        {type}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="transportationMode"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Transportation Mode</FormLabel>
+                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <FormControl>
+                    <SelectTrigger className="bg-background/50">
+                      <SelectValue placeholder="How do you want to travel?" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {TRANSPORTATION_MODES.map((mode) => (
+                      <SelectItem key={mode} value={mode}>
+                        {mode}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -249,15 +339,33 @@ export default function TravelForm() {
 
         <FormField
           control={form.control}
+          name="activities"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Preferred Activities</FormLabel>
+              <FormControl>
+                <Textarea
+                  placeholder="What activities interest you? (e.g., hiking, museums, food tours...)"
+                  {...field}
+                  className="bg-background/50 min-h-[80px]"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
           name="preferences"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Travel Preferences</FormLabel>
+              <FormLabel>Additional Preferences</FormLabel>
               <FormControl>
                 <Textarea
-                  placeholder="Tell us about your interests (e.g., adventure, culture, food...)"
+                  placeholder="Any other preferences? (e.g., dietary restrictions, accessibility needs...)"
                   {...field}
-                  className="bg-background/50 min-h-[100px]"
+                  className="bg-background/50 min-h-[80px]"
                 />
               </FormControl>
               <FormMessage />

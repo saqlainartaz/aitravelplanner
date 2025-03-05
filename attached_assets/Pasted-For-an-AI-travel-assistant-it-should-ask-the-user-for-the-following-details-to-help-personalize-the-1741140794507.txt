@@ -1,0 +1,42 @@
+For an AI travel assistant, it should ask the user for the following details to help personalize the travel experience and make recommendations:
+
+1. Travel Destination:
+Where are you planning to go? (city/country)
+Do you have a specific region or country in mind for your travels?
+2. Dates of Travel:
+What are your preferred travel dates? (departure and return)
+Are your travel dates flexible?
+3. Budget:
+What is your budget range for the trip? (low, medium, high)
+Are you looking for budget-friendly or luxury options?
+4. Travel Preferences:
+Do you prefer flying, driving, or another mode of transportation?
+Are you open to connecting flights or direct ones?
+What type of accommodation do you prefer? (Hotel, Airbnb, Hostel, etc.)
+5. Interests and Activities:
+What kind of activities are you interested in? (cultural experiences, adventure, nature, relaxation, shopping, etc.)
+Do you want to explore outdoor activities or indoor cultural spots?
+Are you interested in food tours, historical sites, or nature hikes?
+6. Travel Group:
+Are you traveling alone, with a partner, or with a group/family?
+How many people are in your travel group, and are there any children or special needs?
+7. Accommodation Preferences:
+What type of accommodation are you looking for? (hotel, resort, apartment, hostel, etc.)
+What amenities are important to you? (Wi-Fi, pool, gym, pet-friendly, etc.)
+8. Weather Preferences:
+Do you have a preference for a specific climate or weather? (sunny, cold, tropical, etc.)
+Are you looking to visit during a particular season or event?
+9. Travel Experience Level:
+Are you a frequent traveler or a first-time traveler to this destination?
+Would you like travel tips and suggestions for newbies?
+10. Health and Safety:
+Do you need information about travel insurance, vaccinations, or COVID-19 guidelines?
+Are there any health considerations or allergies I should be aware of?
+11. Special Requests:
+Are there any specific experiences or activities you'd like to include in your trip? (e.g., spa day, local cooking class, museum tour)
+Would you like recommendations for local restaurants, bars, or hidden gems?
+12. Language Preferences:
+Do you need help with language translation or suggestions for common phrases in the local language?
+13. Documents and Essentials:
+Do you need assistance with visa requirements or passport information?
+Are you looking for recommendations on how to organize your travel documents?

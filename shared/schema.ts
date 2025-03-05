@@ -7,21 +7,22 @@ export const travelRequests = pgTable("travel_requests", {
   email: text("email").notNull(),
   destination: text("destination").notNull(),
   budget: integer("budget").notNull(),
-  duration: integer("duration").notNull(),
-  preferences: text("preferences").notNull(),
   startDate: date("start_date").notNull(),
   endDate: date("end_date").notNull(),
+  preferences: text("preferences").notNull(),
+  travelGroup: text("travel_group").notNull(),
+  accommodationType: text("accommodation_type").notNull(),
+  activities: text("activities").notNull(),
+  transportationMode: text("transportation_mode").notNull(),
   recommendations: jsonb("recommendations"),
 });
 
-export const insertTravelRequestSchema = createInsertSchema(travelRequests).pick({
-  email: true,
-  destination: true,
-  budget: true,
-  duration: true,
-  preferences: true,
-  startDate: true,
-  endDate: true,
+export const insertTravelRequestSchema = createInsertSchema(travelRequests, {
+  startDate: z.date(),
+  endDate: z.date(),
+}).omit({
+  id: true,
+  recommendations: true,
 });
 
 export type InsertTravelRequest = z.infer<typeof insertTravelRequestSchema>;

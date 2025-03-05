@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, jsonb, date } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, jsonb } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -8,8 +8,8 @@ export const travelRequests = pgTable("travel_requests", {
   travelFrom: text("travel_from").notNull(),
   destination: text("destination").notNull(),
   budget: integer("budget").notNull(),
-  startDate: text("start_date").notNull(), 
-  endDate: text("end_date").notNull(), 
+  startDate: text("start_date").notNull(),
+  endDate: text("end_date").notNull(),
   preferences: text("preferences").notNull(),
   travelGroup: text("travel_group").notNull(),
   accommodationType: text("accommodation_type").notNull(),
@@ -18,12 +18,8 @@ export const travelRequests = pgTable("travel_requests", {
   recommendations: jsonb("recommendations"),
 });
 
-// For the form validation, we'll handle dates as Date objects
-// but convert them to strings when sending to the server
-export const insertTravelRequestSchema = createInsertSchema(travelRequests, {
-  startDate: z.date().transform(date => date.toISOString()),
-  endDate: z.date().transform(date => date.toISOString()),
-}).omit({
+// For the form validation, we'll handle dates as Date objects and convert them to ISO strings
+export const insertTravelRequestSchema = createInsertSchema(travelRequests).omit({
   id: true,
   recommendations: true,
 });

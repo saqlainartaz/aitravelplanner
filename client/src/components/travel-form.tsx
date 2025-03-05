@@ -66,7 +66,16 @@ const formSchema = insertTravelRequestSchema.extend({
     "Start date must be in the future"
   ),
   endDate: z.date()
-});
+}).refine(
+  (data) => {
+    if (!data.startDate || !data.endDate) return true;
+    return data.endDate > data.startDate;
+  },
+  {
+    message: "End date must be after start date",
+    path: ["endDate"],
+  }
+);
 
 export default function TravelForm() {
   const [isLoading, setIsLoading] = useState(false);
@@ -74,18 +83,7 @@ export default function TravelForm() {
   const { toast } = useToast();
 
   const form = useForm({
-    resolver: zodResolver(
-      formSchema.refine(
-        (data) => {
-          if (!data.startDate || !data.endDate) return true;
-          return data.endDate > data.startDate;
-        },
-        {
-          message: "End date must be after start date",
-          path: ["endDate"],
-        }
-      )
-    ),
+    resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
       travelFrom: "",
@@ -104,11 +102,14 @@ export default function TravelForm() {
   async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/travel-advice", {
+      // Convert dates to ISO strings before sending
+      const requestData = {
         ...data,
-        startDate: data.startDate.toISOString(),
-        endDate: data.endDate.toISOString(),
-      });
+        startDate: data.startDate.toISOString().split('T')[0],
+        endDate: data.endDate.toISOString().split('T')[0],
+      };
+
+      const response = await apiRequest("POST", "/api/travel-advice", requestData);
       const result = await response.json();
 
       if (result.success) {

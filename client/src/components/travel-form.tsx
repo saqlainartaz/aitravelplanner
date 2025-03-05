@@ -75,6 +75,7 @@ export default function TravelForm() {
     ),
     defaultValues: {
       email: "",
+      travelFrom: "", // Added travelFrom
       destination: "",
       budget: undefined,
       startDate: undefined,
@@ -125,6 +126,24 @@ export default function TravelForm() {
               <FormControl>
                 <Input 
                   placeholder="your@email.com" 
+                  {...field}
+                  className="bg-background/50"
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        <FormField
+          control={form.control}
+          name="travelFrom"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Traveling From</FormLabel>
+              <FormControl>
+                <Input 
+                  placeholder="Your departure city/location" 
                   {...field}
                   className="bg-background/50"
                 />

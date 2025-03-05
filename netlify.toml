@@ -1,0 +1,6 @@
+[build]
+  publish = "dist"  # The folder where the built app is located
+  command = "npm run build"  # Command to build the project
+
+[[plugins]]
+  package = "@netlify/plugin-functions-install-core"

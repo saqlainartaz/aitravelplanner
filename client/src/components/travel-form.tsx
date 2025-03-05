@@ -54,6 +54,20 @@ const TRAVEL_GROUPS = [
   "Business",
 ];
 
+const formSchema = insertTravelRequestSchema.extend({
+  email: z.string().email("Please enter a valid email"),
+  budget: z.number().min(100, "Budget must be at least $100"),
+  startDate: z.date().refine(
+    (date) => {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      return date > today;
+    },
+    "Start date must be in the future"
+  ),
+  endDate: z.date()
+});
+
 export default function TravelForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [, setLocation] = useLocation();
@@ -61,32 +75,16 @@ export default function TravelForm() {
 
   const form = useForm({
     resolver: zodResolver(
-      insertTravelRequestSchema.extend({
-        email: insertTravelRequestSchema.shape.email.email("Please enter a valid email"),
-        budget: insertTravelRequestSchema.shape.budget.min(100, "Budget must be at least $100"),
-        startDate: z.date().refine(
-          (date) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            return date > today;
-          },
-          "Start date must be in the future"
-        ),
-        endDate: z.date().refine(
-          (date) => {
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
-            return date > today;
-          },
-          "End date must be in the future"
-        ).refine(
-          (date, ctx) => {
-            const startDate = ctx.parent.startDate;
-            return !startDate || date > startDate;
-          },
-          "End date must be after start date"
-        ),
-      })
+      formSchema.refine(
+        (data) => {
+          if (!data.startDate || !data.endDate) return true;
+          return data.endDate > data.startDate;
+        },
+        {
+          message: "End date must be after start date",
+          path: ["endDate"],
+        }
+      )
     ),
     defaultValues: {
       email: "",
@@ -103,10 +101,14 @@ export default function TravelForm() {
     },
   });
 
-  async function onSubmit(data: any) {
+  async function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
     try {
-      const response = await apiRequest("POST", "/api/travel-advice", data);
+      const response = await apiRequest("POST", "/api/travel-advice", {
+        ...data,
+        startDate: data.startDate.toISOString(),
+        endDate: data.endDate.toISOString(),
+      });
       const result = await response.json();
 
       if (result.success) {
